@@ -1,0 +1,55 @@
+from contextlib import asynccontextmanager
+from fastapi import FastAPI
+
+from src.routers.system import set_app_instance, system_router
+from src.core.config import settings
+from src.core.database import close_db, init_db
+from src.core.logger import logger, shutdown_logging
+
+
+
+
+
+
+
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    """Контекст жизненного цикла приложения"""
+    # Инициализируем подключение к БД
+    logger.info("Initializing database connection...")
+    await init_db()
+
+    logger.info("Application startup complete")
+    yield
+
+    # Shutdown
+    logger.info("Shutting down application...")
+    await close_db()
+
+    # Корректно завершаем работу логгера
+    shutdown_logging()
+    logger.info("Application shutdown complete")
+
+
+
+
+app = FastAPI(
+    lifespan=lifespan,
+    title=f"Web {settings.APP_NAME} API Documentation",
+    description=f"{settings.APP_NAME} api",
+    version="1.0.0",
+    openapi_url=None,
+    docs_url=None,
+    redoc_url=None,
+)
+
+app.include_router(system_router)
+
+set_app_instance(app)
+
+
+
+
+
+
