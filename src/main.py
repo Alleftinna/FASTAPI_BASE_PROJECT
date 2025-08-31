@@ -5,7 +5,7 @@ from src.routers.system import set_app_instance, system_router
 from src.core.config import settings
 from src.core.database import close_db, init_db
 from src.core.logger import logger, shutdown_logging
-
+from src.core.scheduler import set_jobs, stop_scheduler
 
 
 
@@ -19,6 +19,7 @@ async def lifespan(app: FastAPI):
     # Инициализируем подключение к БД
     logger.info("Initializing database connection...")
     await init_db()
+    await set_jobs()
 
     logger.info("Application startup complete")
     yield
@@ -26,7 +27,7 @@ async def lifespan(app: FastAPI):
     # Shutdown
     logger.info("Shutting down application...")
     await close_db()
-
+    await stop_scheduler()
     # Корректно завершаем работу логгера
     shutdown_logging()
     logger.info("Application shutdown complete")
