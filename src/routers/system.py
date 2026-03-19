@@ -5,7 +5,6 @@
 from fastapi import APIRouter, FastAPI, HTTPException, Request, Response, status
 from fastapi.openapi.docs import (
     get_swagger_ui_html,
-
 )
 
 from src.core.config import settings
@@ -16,8 +15,6 @@ from src.core.templates import templates
 system_router = APIRouter()
 
 
-
-
 @system_router.get("/", include_in_schema=False)
 async def root(request: Request):
     """Главная страница"""
@@ -25,8 +22,7 @@ async def root(request: Request):
 
 
 @system_router.get("/docs", include_in_schema=False)
-async def get_documentation(
-):
+async def get_documentation():
     """
     Кастомная страница Swagger UI с правильной настройкой OAuth2 Authorization Code Flow + PKCE
     """
@@ -34,7 +30,6 @@ async def get_documentation(
         openapi_url="/openapi.json",
         title=f"Web {settings.APP_NAME} API Documentation",
     )
-
 
 
 # Переменная для хранения ссылки на приложение

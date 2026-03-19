@@ -1,11 +1,8 @@
 import logging
 import logging.config
-
 from pathlib import Path
 
-
 from src.core.config import settings
-
 
 
 def configure_sql_logging() -> None:
@@ -34,6 +31,7 @@ def configure_sql_logging() -> None:
         sql_logger.setLevel(sql_level)
         # Отключаем propagation, чтобы SQL логи не попадали в root logger
         sql_logger.propagate = False
+
 
 def setup_logging():
     """

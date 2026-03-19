@@ -1,6 +1,5 @@
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 
-
 scheduler = AsyncIOScheduler()
 
 
@@ -11,7 +10,3 @@ async def set_jobs():
 
 async def stop_scheduler():
     scheduler.shutdown()
-
-
-
-

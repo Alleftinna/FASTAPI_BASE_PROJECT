@@ -1,4 +1,5 @@
-from typing import Generic, Sequence, TypeVar
+from collections.abc import Sequence
+from typing import Generic, TypeVar
 
 from pydantic import BaseModel, Field
 
@@ -21,4 +22,3 @@ def paginate_params(page: int | None, page_size: int | None) -> tuple[int, int]:
     current_page = max(1, page or 1)
     current_size = max(1, min(100, page_size or 20))
     return current_page, current_size
-

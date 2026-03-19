@@ -25,7 +25,7 @@ class Settings(BaseSettings):
     SQL_LOG_LEVEL: str = "INFO"  # DEBUG, INFO, WARNING, ERROR
     SQL_LOG_TO_CONSOLE: bool = False  # Отключаем SQL логи в консоли по умолчанию
     SQL_LOG_TO_FILE: bool = True  # Включаем SQL логи в файл по умолчанию
-    
+
     @property
     def database_echo(self) -> bool:
         """Возвращает флаг SQL echo для SQLAlchemy."""

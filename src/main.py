@@ -1,4 +1,5 @@
 from contextlib import asynccontextmanager
+
 from fastapi import FastAPI
 
 from src.core.config import settings
@@ -8,11 +9,6 @@ from src.core.scheduler import set_jobs, stop_scheduler
 from src.integrations import setup_sentry
 from src.routers.system import set_app_instance, system_router
 from src.routers.users import users_router
-
-
-
-
-
 
 
 @asynccontextmanager
@@ -36,8 +32,6 @@ async def lifespan(app: FastAPI):
     logger.info("Application shutdown complete")
 
 
-
-
 app = FastAPI(
     lifespan=lifespan,
     title=f"Web {settings.APP_NAME} API Documentation",
@@ -52,9 +46,3 @@ app.include_router(system_router)
 app.include_router(users_router)
 
 set_app_instance(app)
-
-
-
-
-
-

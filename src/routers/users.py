@@ -1,3 +1,5 @@
+from typing import Annotated
+
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -11,7 +13,7 @@ users_router = APIRouter(prefix="/users", tags=["users"])
 @users_router.post("", response_model=UserRead, status_code=status.HTTP_201_CREATED)
 async def create_user(
     payload: UserCreate,
-    session: AsyncSession = Depends(get_session),
+    session: Annotated[AsyncSession, Depends(get_session)],
 ) -> UserRead:
     service = UserService(session=session)
     try:
@@ -26,9 +28,9 @@ async def create_user(
 
 @users_router.get("", response_model=list[UserRead])
 async def list_users(
+    session: Annotated[AsyncSession, Depends(get_session)],
     limit: int = 100,
     offset: int = 0,
-    session: AsyncSession = Depends(get_session),
 ) -> list[UserRead]:
     service = UserService(session=session)
     users = await service.list_users(limit=limit, offset=offset)

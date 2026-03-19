@@ -1,5 +1,4 @@
-
-from typing import AsyncGenerator
+from collections.abc import AsyncGenerator
 
 from sqlalchemy import text
 from sqlalchemy.exc import SQLAlchemyError
@@ -10,7 +9,14 @@ from src.core.config import settings
 from src.core.logger import logger
 from src.models.base import Base
 
-__all__ = ("Base", "get_session", "init_db", "close_db", "is_db_healthy", "engine_async")
+__all__ = (
+    "Base",
+    "get_session",
+    "init_db",
+    "close_db",
+    "is_db_healthy",
+    "engine_async",
+)
 
 
 engine_async = create_async_engine(
