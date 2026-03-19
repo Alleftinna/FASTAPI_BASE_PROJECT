@@ -1,11 +1,13 @@
 from contextlib import asynccontextmanager
 from fastapi import FastAPI
 
-from src.routers.system import set_app_instance, system_router
 from src.core.config import settings
 from src.core.database import close_db, init_db
 from src.core.logger import logger, shutdown_logging
 from src.core.scheduler import set_jobs, stop_scheduler
+from src.integrations import setup_sentry
+from src.routers.system import set_app_instance, system_router
+from src.routers.users import users_router
 
 
 
@@ -18,6 +20,7 @@ async def lifespan(app: FastAPI):
     """Контекст жизненного цикла приложения"""
     # Инициализируем подключение к БД
     logger.info("Initializing database connection...")
+    setup_sentry()
     await init_db()
     await set_jobs()
 
@@ -46,6 +49,7 @@ app = FastAPI(
 )
 
 app.include_router(system_router)
+app.include_router(users_router)
 
 set_app_instance(app)
 

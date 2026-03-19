@@ -1,20 +1,16 @@
 
 from typing import AsyncGenerator
 
-from sqlalchemy import MetaData
+from sqlalchemy import text
+from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
-from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, sessionmaker
+from sqlalchemy.orm import sessionmaker
 
 from src.core.config import settings
 from src.core.logger import logger
+from src.models.base import Base
 
-metadata = MetaData()
-
-
-class Base(DeclarativeBase):
-    """Базовый класс для моделей SQLAlchemy"""
-
-    metadata = metadata
+__all__ = ("Base", "get_session", "init_db", "close_db", "is_db_healthy", "engine_async")
 
 
 engine_async = create_async_engine(
@@ -39,7 +35,7 @@ async def init_db() -> None:
         async with engine_async.begin() as conn:
             await conn.run_sync(lambda _: None)
         logger.info("Database connection established successfully")
-    except Exception as e:
+    except SQLAlchemyError as e:
         logger.error(f"Error connecting to database: {e}")
         raise
 
@@ -49,9 +45,20 @@ async def close_db() -> None:
     try:
         await engine_async.dispose()
         logger.info("Database connection closed successfully")
-    except Exception as e:
+    except SQLAlchemyError as e:
         logger.error(f"Error closing database connection: {e}")
         raise
+
+
+async def is_db_healthy() -> bool:
+    """Проверка доступности базы данных для readiness probe."""
+    try:
+        async with engine_async.connect() as connection:
+            await connection.execute(text("SELECT 1"))
+        return True
+    except SQLAlchemyError as error:
+        logger.warning(f"Database health check failed: {error}")
+        return False
 
 
 async def get_session() -> AsyncGenerator[AsyncSession, None]:

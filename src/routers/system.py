@@ -2,13 +2,14 @@
 Системные роуты приложения
 """
 
-from fastapi import APIRouter, HTTPException, Request, Response, status
+from fastapi import APIRouter, FastAPI, HTTPException, Request, Response, status
 from fastapi.openapi.docs import (
     get_swagger_ui_html,
 
 )
 
 from src.core.config import settings
+from src.core.database import is_db_healthy
 from src.core.templates import templates
 
 # Создаем роутер для системных эндпоинтов
@@ -37,10 +38,10 @@ async def get_documentation(
 
 
 # Переменная для хранения ссылки на приложение
-_app_instance = None
+_app_instance: FastAPI | None = None
 
 
-def set_app_instance(app):
+def set_app_instance(app: FastAPI) -> None:
     """Устанавливает ссылку на экземпляр приложения для избежания циклических импортов"""
     global _app_instance
     _app_instance = app
@@ -71,7 +72,29 @@ async def robots_txt():
     return Response(content, media_type="text/plain")
 
 
+@system_router.get("/health/live", include_in_schema=False)
+async def liveness_probe() -> dict[str, str]:
+    """Liveness probe: сервис запущен."""
+    return {"status": "ok"}
+
+
+@system_router.get("/health/ready", include_in_schema=False)
+async def readiness_probe() -> dict[str, str]:
+    """Readiness probe: сервис готов принимать трафик."""
+    if not await is_db_healthy():
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail="Database is not ready",
+        )
+    return {"status": "ready"}
+
+
 @system_router.get("/sentry-debug", include_in_schema=False)
 async def trigger_error():
     """Debug endpoint для тестирования Sentry"""
-    division_by_zero = 1 / 0
+    if not settings.debug_enabled:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Endpoint is available only in debug mode",
+        )
+    return {"value": 1 / 0}

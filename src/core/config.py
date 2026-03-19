@@ -1,9 +1,10 @@
-
 from pydantic import ConfigDict
 from pydantic_settings import BaseSettings
 
 
 class Settings(BaseSettings):
+    model_config = ConfigDict(env_file=".env", extra="ignore")
+
     # Application settings
     APP_NAME: str
     DEBUG: bool = False
@@ -14,8 +15,11 @@ class Settings(BaseSettings):
     DB_USER: str
     DB_PASS: str
     DB_NAME: str
+    DB_HOST: str = "localhost"
     DB_PORT: int
     DATABASE_ECHO: bool
+    DATABASE_URL: str | None = None
+    SENTRY_DSN: str | None = None
 
     # Logging settings
     SQL_LOG_LEVEL: str = "INFO"  # DEBUG, INFO, WARNING, ERROR
@@ -24,21 +28,31 @@ class Settings(BaseSettings):
     
     @property
     def database_echo(self) -> bool:
-        """Преобразует строковое значение DEBUG в bool"""
-        return str(self.DATABASE_ECHO).lower() in ["True", "true", "1"]
+        """Возвращает флаг SQL echo для SQLAlchemy."""
+        return self.DATABASE_ECHO
 
     @property
     def debug_enabled(self) -> bool:
-        """Преобразует строковое значение DEBUG в bool"""
-        return str(self.DEBUG).lower() in ["True", "true", "1"]
-    
-    @property
-    def async_database_url(self):
-        return f"postgresql+asyncpg://{self.DB_USER}:{self.DB_PASS}@{self.DB_HOST}:5432/{self.DB_NAME}"
+        """Возвращает флаг debug режима приложения."""
+        return self.DEBUG
 
     @property
-    def DB_HOST(self):
-        return f"{self.APP_NAME}_db"
+    def async_database_url(self) -> str:
+        if self.DATABASE_URL:
+            return self.DATABASE_URL
+        return (
+            f"postgresql+asyncpg://{self.DB_USER}:{self.DB_PASS}"
+            f"@{self.DB_HOST}:{self.DB_PORT}/{self.DB_NAME}"
+        )
+
+    @property
+    def sync_database_url(self) -> str:
+        if self.DATABASE_URL:
+            return self.DATABASE_URL.replace("+asyncpg", "+psycopg2")
+        return (
+            f"postgresql+psycopg2://{self.DB_USER}:{self.DB_PASS}"
+            f"@{self.DB_HOST}:{self.DB_PORT}/{self.DB_NAME}"
+        )
 
 
 settings = Settings()

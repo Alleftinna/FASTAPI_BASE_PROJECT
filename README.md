@@ -78,11 +78,14 @@ DEBUG=1
 ### 3. Запуск с Docker (рекомендуется)
 
 ```bash
-# Сборка и запуск всех сервисов
+# DEV: сборка и запуск
 docker-compose up --build
 
-# Запуск в фоновом режиме
+# DEV: запуск в фоновом режиме
 docker-compose up -d --build
+
+# PROD-профиль (без --reload и без bind-mount)
+docker-compose -f docker-compose.yml -f docker-compose.prod.yml up -d --build
 ```
 
 ### 4. Локальная разработка
@@ -99,6 +102,22 @@ docker-compose up db -d
 
 # Запуск приложения
 uvicorn src.main:app --reload --host 0.0.0.0 --port 8000
+```
+
+### 5. Проверки качества кода
+
+```bash
+# Линтинг
+poetry run ruff check src tests
+
+# Статическая типизация
+poetry run mypy src tests
+
+# Установка pre-commit хуков
+poetry run pre-commit install
+
+# Прогон хуков вручную
+poetry run pre-commit run --all-files
 ```
 
 ## 📚 API Документация
@@ -122,6 +141,9 @@ alembic upgrade head
 
 # Откат миграции
 alembic downgrade -1
+
+# Проверка, что Alembic скрипты корректно видят текущие head-ревизии
+alembic heads
 ```
 
 ### Подключение к БД
@@ -146,6 +168,15 @@ poetry run pytest --cov=src
 # Запуск конкретного теста
 poetry run pytest tests/test_specific.py::test_function
 ```
+
+## ✅ CI
+
+В проект добавлен workflow `.github/workflows/ci.yml`, который запускает:
+
+- `ruff check`
+- `mypy`
+- `pytest --cov=src`
+- `alembic heads`
 
 ## 📝 Логирование
 
@@ -193,6 +224,11 @@ docker build -t your-app-name .
 ```bash
 docker run -p 8899:8000 --env-file .env your-app-name
 ```
+
+### Health endpoints
+
+- `GET /health/live` — liveness probe
+- `GET /health/ready` — readiness probe (проверяет подключение к БД)
 
 ## 📦 Зависимости
 
