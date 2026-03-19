@@ -26,11 +26,11 @@ def test_builds_async_database_url_from_parts() -> None:
     settings = build_settings()
     assert (
         settings.async_database_url
-        == "postgresql+asyncpg://user:password@localhost:5432/postgres"
+        == "postgresql+psycopg://user:password@localhost:5432/postgres"
     )
 
 
 def test_uses_database_url_when_provided() -> None:
     settings = build_settings(DATABASE_URL="postgresql+asyncpg://a:b@db:5432/test_db")
-    assert settings.async_database_url == "postgresql+asyncpg://a:b@db:5432/test_db"
-    assert settings.sync_database_url == "postgresql+psycopg2://a:b@db:5432/test_db"
+    assert settings.async_database_url == "postgresql+psycopg://a:b@db:5432/test_db"
+    assert settings.sync_database_url == "postgresql+psycopg://a:b@db:5432/test_db"

@@ -1,6 +1,6 @@
 from typing import Annotated
 
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.core.database import get_session
@@ -16,13 +16,7 @@ async def create_user(
     session: Annotated[AsyncSession, Depends(get_session)],
 ) -> UserRead:
     service = UserService(session=session)
-    try:
-        user = await service.create_user(payload)
-    except ValueError as error:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail=str(error),
-        ) from error
+    user = await service.create_user(payload)
     return UserRead.model_validate(user)
 
 

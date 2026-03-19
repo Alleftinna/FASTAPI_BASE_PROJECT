@@ -10,7 +10,7 @@
 - **Alembic** - миграции базы данных
 - **Pydantic** - валидация данных и сериализация
 - **Docker & Docker Compose** - контейнеризация
-- **Poetry** - управление зависимостями
+- **uv** - управление зависимостями и lock-файлом
 - **Структурированное логирование**
 - **Конфигурация через переменные окружения**
 - **Готовые шаблоны для масштабируемой архитектуры**
@@ -45,9 +45,9 @@ FASTAPI_TEMPLATE-PROJECT/
 
 ### Предварительные требования
 
-- Python 3.11+
+- Python 3.14
 - Docker и Docker Compose
-- Poetry (рекомендуется)
+- uv
 
 ### 1. Клонирование и настройка
 
@@ -92,32 +92,29 @@ docker-compose -f docker-compose.yml -f docker-compose.prod.yml up -d --build
 
 ```bash
 # Установка зависимостей
-poetry install
-
-# Активация виртуального окружения
-poetry shell
+uv sync --all-groups
 
 # Запуск PostgreSQL через Docker
 docker-compose up db -d
 
 # Запуск приложения
-uvicorn src.main:app --reload --host 0.0.0.0 --port 8000
+uv run uvicorn src.main:app --reload --host 0.0.0.0 --port 8000
 ```
 
 ### 5. Проверки качества кода
 
 ```bash
 # Линтинг
-poetry run ruff check src tests
+uv run ruff check src tests
 
 # Статическая типизация
-poetry run mypy src tests
+uv run mypy src tests
 
 # Установка pre-commit хуков
-poetry run pre-commit install
+uv run pre-commit install
 
 # Прогон хуков вручную
-poetry run pre-commit run --all-files
+uv run pre-commit run --all-files
 ```
 
 ## 📚 API Документация
@@ -160,13 +157,13 @@ psql -h localhost -p 5435 -U your_user -d postgres
 
 ```bash
 # Запуск тестов
-poetry run pytest
+uv run pytest
 
 # Запуск с покрытием
-poetry run pytest --cov=src
+uv run pytest --cov=src
 
 # Запуск конкретного теста
-poetry run pytest tests/test_specific.py::test_function
+uv run pytest tests/test_specific.py::test_function
 ```
 
 ## ✅ CI
@@ -239,8 +236,7 @@ docker run -p 8899:8000 --env-file .env your-app-name
 - **SQLAlchemy** - ORM
 - **Alembic** - миграции
 - **Pydantic** - валидация данных
-- **Psycopg2** - драйвер PostgreSQL
-- **AsyncPG** - асинхронный драйвер PostgreSQL
+- **Psycopg (v3)** - драйвер PostgreSQL (sync + async)
 - **Jinja2** - шаблонизатор
 - **APScheduler** - планировщик задач
 - **Boto3** - AWS SDK

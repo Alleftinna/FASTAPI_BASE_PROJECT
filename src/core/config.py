@@ -39,20 +39,18 @@ class Settings(BaseSettings):
     @property
     def async_database_url(self) -> str:
         if self.DATABASE_URL:
-            return self.DATABASE_URL
+            return (
+                self.DATABASE_URL.replace("+asyncpg", "+psycopg")
+                .replace("+psycopg2", "+psycopg")
+            )
         return (
-            f"postgresql+asyncpg://{self.DB_USER}:{self.DB_PASS}"
+            f"postgresql+psycopg://{self.DB_USER}:{self.DB_PASS}"
             f"@{self.DB_HOST}:{self.DB_PORT}/{self.DB_NAME}"
         )
 
     @property
     def sync_database_url(self) -> str:
-        if self.DATABASE_URL:
-            return self.DATABASE_URL.replace("+asyncpg", "+psycopg2")
-        return (
-            f"postgresql+psycopg2://{self.DB_USER}:{self.DB_PASS}"
-            f"@{self.DB_HOST}:{self.DB_PORT}/{self.DB_NAME}"
-        )
+        return self.async_database_url
 
 
 settings = Settings()
